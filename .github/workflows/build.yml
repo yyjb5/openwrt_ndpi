@@ -1,0 +1,34 @@
+name: Build ndpiReader for OpenWrt
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build ndpiReader
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup OpenWrt SDK
+        run: |
+          wget https://downloads.openwrt.org/releases/23.05.3/targets/mediatek/filogic/openwrt-sdk-23.05.3-mediatek-filogic_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+          tar -xf openwrt-sdk-*.tar.xz
+          mv openwrt-sdk-* openwrt-sdk
+          ln -s $(pwd)/ndpi openwrt-sdk/package/ndpi
+
+      - name: Build package
+        run: |
+          cd openwrt-sdk
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          make defconfig
+          make package/ndpiReader/compile V=s
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ndpiReader-ipk
+          path: openwrt-sdk/bin/packages/**/ndpiReader_*.ipk
