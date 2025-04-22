@@ -1,6 +1,7 @@
 name: Build ndpiReader for OpenWrt
 
 on:
+  repository_dispatch:
   workflow_dispatch:
 
 jobs:
